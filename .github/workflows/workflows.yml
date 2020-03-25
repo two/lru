@@ -1,0 +1,53 @@
+name: Build and Test
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+  
+jobs:
+  lint:
+    name: Lint
+    strategy:
+      matrix:
+        go-version: [1.12.x, 1.13.x, 1.14.x]
+        platform: [ubuntu-latest]
+    runs-on:  ${{ matrix.platform }}
+    steps:
+      - name: Set up Go
+        uses: actions/setup-go@v1
+        with:
+          go-version: ${{ matrix.go-version }}
+
+      - name: Check out code
+        uses: actions/checkout@v1
+
+      - name: Lint Go Code
+        run: |
+          export PATH=$PATH:$(go env GOPATH)/bin 
+          go get -u golang.org/x/lint/golint 
+          golint -set_exit_status ./...
+  test:
+    name: Test
+    strategy:
+      matrix:
+        go-version: [1.12.x, 1.13.x, 1.14.x]
+        platform: [ubuntu-latest]
+    runs-on:  ${{ matrix.platform }}
+    steps:
+      - name: Set up Go
+        uses: actions/setup-go@v1
+        with:
+          go-version: ${{ matrix.go-version }}
+
+      - name: Check out code
+        uses: actions/checkout@v1
+
+      - name: Run Unit tests.
+        run: go test -race -coverprofile=coverage.txt -covermode=atomic
+      
+      - name: Upload Coverage report to CodeCov
+        uses: codecov/codecov-action@v1.0.0
+        with:
+          token: 959082e6-3f7d-4c34-b017-7e98db45de24
+          file: ./coverage.txt
