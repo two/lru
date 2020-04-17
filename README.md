@@ -28,3 +28,5 @@ lru.Remove("key1")
 lru.Clear()
 ```
 
+
+
